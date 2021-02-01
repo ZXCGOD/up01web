@@ -1,14 +1,13 @@
 var nodeStatic = require('node-static');
 var fileServer = new nodeStatic.Server(`${__dirname}/static`);
 
-function route(handle, pathname, request,response) {
-  console.log("About to route a request for " + pathname);
+function route(handle, pathname, request, response) {
+	//onsole.log("Request:", request);
+    console.log(`About to route a request from ${request.socket.remoteAddress} for ${pathname}`);
   if ((typeof handle[pathname]) === 'function') {
-    handle[pathname](response);
+    handle[pathname](request, response);
   } else {
-   // console.log("No request handler found for " + pathname);
-   // response.end();
-   fileServer.serve(request,response);
+    fileServer.serve(request, response);
   }
 }
 
