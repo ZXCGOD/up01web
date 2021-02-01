@@ -1,30 +1,19 @@
 var intervalPointer;
 
+var handlers = {};
+
+handlers['login']=login;
+handlers['list']=list;
+handlers['help']=help;
+
 function router(state) {
 var route = document.location.hash.replace('#', '');
-switch(route){
-	case 'login':
-	document.getElementById("app").innerHTML = 'Здесь будет форма логина';
-	break;
-	case 'list':
-	document.getElementById("app").innerHTML = 'Здесь будет форма списка';
-	break;
-	default:
-	document.getElementById("app").innerHTML = 'Здесь будет форма списка';
-	break;
-}
-clearInterval(intervalPointer);
-intervalPointer = setInterval(function() {
-	var newRoute;
-	if(route === 'login'){
-		newRoute = 'list';
-			}	else if(route === 'list')  {
-				newRoute = 'login';
-			} else {
-				newRoute= 'list'
-			}
-			document.location.hash = `#${newRoute}`;
-}, 1000);
+
+ if ((typeof handlers[route]) === 'function') {
+    handlers[route]();
+  } else {
+    handlers['login']();
+  }
 }
 
 window.addEventListener('popstate', router);
