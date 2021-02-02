@@ -1,4 +1,3 @@
-
 function refresh(inputData){
 	var listTableBody = document.getElementById('list-table-body');
 	listTableBody.innerHTML = '';
@@ -21,16 +20,14 @@ function downloadDataFromServer(){
 				refresh(data);
 			});
 		} else {
-			var notOkResponse = `${response.status}  ${response.statusText}`
-			console.log("Ошибка: ",notOkResponse);
+			var notOkResponse = `${response.status} ${response.statusText}`;
 			listTableBody.innerHTML = `<tr><td colspan=3><div class="error">${notOkResponse}</div></td></tr>`;
 		}
 	}).catch(function(error){
-			listTableBody.innerHTML = `<tr><td colspan=3><div class="error">${notOkResponse}</div></td></tr>`;
+			listTableBody.innerHTML = `<tr><td colspan=3><div class="error">Network Error (await 5 sec...)</div></td></tr>`;
 	});
 }
 
 window.onload = function(){
 	downloadDataFromServer();
-
 };
