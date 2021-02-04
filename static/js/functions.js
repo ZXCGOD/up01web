@@ -74,7 +74,7 @@ async function doLogout(){
 				'Content-Type': 'application/json;charset=utf-8'
 			},
 			body: JSON.stringify({token: token})
-		}).then(function(response){
+		}).then(function(response){slugin
 			if(response.ok){
 				response.text().then(function(data){
 					resolve({status: 'success', data: data});
@@ -182,7 +182,7 @@ function showImageInModal(filePath, fileTitle){
 	var dlgTitle = document.getElementById('modal-dialog-title');
 
 	dlgTitle.innerHTML = fileTitle;
-	dlgImg.setAttribute('src', filePath);
+	dlgImg.setAttribute('src', filePath + "/" + fileTitle);
 
 	console.log('classList before?', dlg.classList);
 	dlg.classList.remove('hide');
