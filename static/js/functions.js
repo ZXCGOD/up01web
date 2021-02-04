@@ -213,7 +213,7 @@ function showImageInModal(filePath, fileTitle){
 	var dlgTitle = document.getElementById('modal-dialog-title');
 
 	dlgTitle.innerHTML = fileTitle;
-	dlgImg.setAttribute('src', filePath);
+	dlgImg.setAttribute('src', filePath + "/" + fileTitle);
 
 	console.log('classList before?', dlg.classList);
 	dlg.classList.remove('hide');
