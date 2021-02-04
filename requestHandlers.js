@@ -4,7 +4,8 @@ let sequelize = new Sequelize('db', 'user', '123456',
 	{ host: 'localhost', dialect: 'mariadb' });
 
 let fs = require('fs');
-var url = require("url");
+let url = require("url");
+let archiver = require('archiver');
 
 /**
  * Item Model - begin
@@ -279,32 +280,52 @@ Token.sync(); // { force: true }
  	});
  }
 
-function createArchiveAndGetItPath(ids){
-	var filepath = `${__dirname}/files.zip`;
-	/* Задание*!
-	 *
-	 * Сформировать файл filepath по следующему алгоритму:
-	 * 1. из массива ids получить по id полный путь до файлов изображений
-	 *    (т.е. сходить в бд, достать по id записи и получить из них полные пути до файлов)
-	 * 2. на www.npmjs.com подобрать модуль, постедством которого выполнить создание архива из полученных в п.1 файлов
-	 *    и положить результирующий архив по пути, указанному в filepath (перезаписываит кадлый раз этот файл)
-	 * 3. ниже этой строчки происходит возврат пути до этого файла и логика передачи файла на веб приложение,
-	 *    а также логика получения и сохранения файла веб приложением уже реализована!
-	 */
+async function createArchiveAndGetItPath(ids){
+	const output = fs.createWriteStream(__dirname + '/images.zip');  //Назначили место куда будет записан архив
+	const archive = archiver('zip', {
+	  zlib: { level: 9 }											//Установили уровень сжатия и формат				 
+	});
+	archive.pipe(output);
+
+var items = await new Promise (async function (resolve){
+		var items = [];
+		await Item.findAll({
+ 			where : {
+ 				id: ids
+ 			}
+ 		}).then(function (item) {
+ 			item.forEach(function(element){							//Поместили в массив все items, которые были выбраны в форме
+				items.push(element);
+ 			})
+  		}).catch(function (error) {
+ 			console.log(error);
+ 		});
+		resolve(items);
+	});
+items.forEach(function (item)
+	{
+			var file = __dirname + '/static' + item.dataValues.filepath + '/' + item.dataValues.title;	//прописываем путь до файла
+ 			console.log(file);
+ 			archive.append(fs.createReadStream(file), { name: item.dataValues.title });					//добавляем в архив
+						
+ 	
+	});
+	archive.finalize();																					//заврешаем создание архива
+ 	var filepath = `${__dirname}/images.zip`;															//возвращаем путь до архива
 	return filepath;
 }
 
  /**
  * Функция обработки операции получения нескольких изображений
  */
- function download(request, response) {
- 	authorize(request.headers.token, function(userId) {
+function download(request, response) {
+ 	authorize(request.headers.token, async function(userId) {
 
  		var query = url.parse(request.url).query;
  		var ids = query.replace(/^ids=/, '').split('%2C');
  		
- 		var filePath = createArchiveAndGetItPath(ids);
-		var stat = fs.statSync(filePath);
+ 		var filePath = await createArchiveAndGetItPath(ids);
+		var stat = await fs.statSync(filePath);
 
  		response.writeHead(200, {
                 'Content-Type': 'application/zip',
