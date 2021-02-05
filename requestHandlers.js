@@ -1,6 +1,6 @@
 let { Sequelize, Model, DataTypes } = require('sequelize');
 
-let sequelize = new Sequelize('db', 'user', '123456', 
+let sequelize = new Sequelize('db', 'mysql', '12345', 
 	{ host: 'localhost', dialect: 'mariadb' });
 
 let fs = require('fs');
@@ -279,19 +279,20 @@ Token.sync(); // { force: true }
  		response.end();
  	});
  }
-
  function createArchiveAndGetItPath(ids){
-	var filepath = `${__dirname}/files.zip`;
+var filepath = `${__dirname}/files.zip`;
 	Item.findAll({
 		where: {
 			id: ids
 		}
 	}).then(function(items) {
+var zip = require('adm-zip');
 			var archive = new zip()
 			items.forEach(function(item) {
-			archive.addLocalFile(`${__dirname}/img${item.filepath}`)
+			archive.addLocalFile(`${__dirname}/static/img/${item.title}`)
 		})
 		archive.writeZip(filepath, '/')
+
 
 	}).catch(function(err) {
 	console.log(err)
