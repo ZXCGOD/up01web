@@ -5,7 +5,7 @@ let sequelize = new Sequelize('db', 'user', '123456',
 
 let fs = require('fs');
 let url = require("url");
-let archiver = require('archiver');
+var AdmZip = require('adm-zip');
 
 /**
  * Item Model - begin
@@ -280,38 +280,22 @@ Token.sync(); // { force: true }
  	});
  }
 
-async function createArchiveAndGetItPath(ids){
-	const output = fs.createWriteStream(__dirname + '/images.zip');  //Назначили место куда будет записан архив
-	const archive = archiver('zip', {
-	  zlib: { level: 9 }											//Установили уровень сжатия и формат				 
-	});
-	archive.pipe(output);
+ function createArchiveAndGetItPath(ids){
+	var filepath = `${__dirname}/files.zip`;
+	Item.findAll({
+		where: {
+			id: ids
+		}
+	}).then(function(items) {
+			var archive = new zip()
+			items.forEach(function(item) {
+			archive.addLocalFile(`${__dirname}/img${item.filepath}`)
+		})
+		archive.writeZip(filepath, '/')
 
-var items = await new Promise (async function (resolve){
-		var items = [];
-		await Item.findAll({
- 			where : {
- 				id: ids
- 			}
- 		}).then(function (item) {
- 			item.forEach(function(element){							//Поместили в массив все items, которые были выбраны в форме
-				items.push(element);
- 			})
-  		}).catch(function (error) {
- 			console.log(error);
- 		});
-		resolve(items);
-	});
-items.forEach(function (item)
-	{
-			var file = __dirname + '/static' + item.dataValues.filepath + '/' + item.dataValues.title;	//прописываем путь до файла
- 			console.log(file);
- 			archive.append(fs.createReadStream(file), { name: item.dataValues.title });					//добавляем в архив
-						
- 	
-	});
-	archive.finalize();																					//заврешаем создание архива
- 	var filepath = `${__dirname}/images.zip`;															//возвращаем путь до архива
+	}).catch(function(err) {
+	console.log(err)
+	})													
 	return filepath;
 }
 
